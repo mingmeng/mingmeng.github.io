@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="windows使用smartdns和docker下搭建一个私有DNS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用smartdns和docker搭建私有防劫持dns服务">
+<meta property="og:url" content="https://blog.yrx.me/post/a62e21c9/">
+<meta property="og:site_name" content="Run away with me">
+<meta property="og:description" content="windows使用smartdns和docker下搭建一个私有DNS">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-02-10T07:59:05.000Z">
+<meta property="article:modified_time" content="2021-12-01T16:18:41.847Z">
+<meta property="article:author" content="mingmeng">
+<meta property="article:tag" content="摸爬滚打">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="dns">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="../../assets/32.png">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="../../assets/120.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="../../assets/120.png">
+          
+        
+    
+    <!-- title -->
+    <title>使用smartdns和docker搭建私有防劫持dns服务</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="../../css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="../../css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="../../index.html">首页</a></li>
+         
+          <li><a href="../../archives/">归档</a></li>
+         
+          <li><a href="../../search/">搜索</a></li>
+         
+          <li><a href="../../about/">关于</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="../4a17b156/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="../dcd86f57/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <!-- qq空间分享 暂时没有找到icon 先不加入 -->
+  <!-- <li><a class="icon" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.yrx.me/post/a62e21c9/&sharesource=qzone&title=使用smartdns和docker搭建私有防劫持dns服务&summary=windows使用smartdns和docker下搭建一个私有DNS&pics=//blog.rx-0.top/assets/120.png" target="_blank" rel="noopener"><i 
+    class="fab fa-star " aria-hidden="true"></i></a></li> -->
+  <li><a class="icon"
+      href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.yrx.me/post/a62e21c9/&sharesource=qzone&title=使用smartdns和docker搭建私有防劫持dns服务&summary=windows使用smartdns和docker下搭建一个私有DNS"><i 
+        class="fab fa-qq " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://service.weibo.com/share/share.php?url=https://blog.yrx.me/post/a62e21c9/&sharesource=weibo&title=使用smartdns和docker搭建私有防劫持dns服务&appkey=2309657449" target="_blank" rel="noopener"><i 
+        class="fas fa-weibo " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://blog.yrx.me/post/a62e21c9/" target="_blank" rel="noopener"><i
+        class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://blog.yrx.me/post/a62e21c9/&text=使用smartdns和docker搭建私有防劫持dns服务" target="_blank" rel="noopener"><i
+        class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=使用smartdns和docker搭建私有防劫持dns服务&body=windows使用smartdns和docker下搭建一个私有DNS:https://blog.yrx.me/post/a62e21c9/"><i
+        class="fas fa-envelope " aria-hidden="true"></i></a></li>
+</ul>
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#引言"><span class="toc-number">1.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#搭建过程"><span class="toc-number">2.</span> <span class="toc-text">搭建过程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参照"><span class="toc-number">3.</span> <span class="toc-text">参照</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        使用smartdns和docker搭建私有防劫持dns服务
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">mingmeng</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-02-10T07:59:05.000Z" itemprop="datePublished">2020-02-10</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="../../tags/dns/" rel="tag">dns</a>, <a class="tag-link" href="../../tags/docker/" rel="tag">docker</a>, <a class="tag-link" href="../../tags/%E6%91%B8%E7%88%AC%E6%BB%9A%E6%89%93/" rel="tag">摸爬滚打</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>最近在家使用移动宽带，使用的ISP DNS出现了DNS的污染，经常会将域名错误解析来劫持域名，十分烦恼。由于DNS本身使用的UDP协议是先到先得，也就是先应答的报文会被视为有效报文。研究了一下ISP的DNS抢答部署，发现是在光猫一级。最开始是希望使用chromium的DNS over https功能，但是还有个问题是其他的设备或者软件使用时，还是会被劫持。因此研究了一下，在windows上搭建一个私有的DNS服务。</p>
+<p>我的需求大概是以下几点：</p>
+<ol>
+<li><p>能够使用DNS over TLS/DNS over https作为上游</p>
+<p> 这点非常重要，因为DNS抢答发生在光猫一级的时候，如果还使用UDP协议作为上游，也就意味着这一层私有DNS向上拿到的仍然是被劫持的结果。</p>
+</li>
+<li><p>方便部署</p>
+<p> 这一点主要是为了方便迁移平台，因为我的目的是让所有使用的设备都能使用这个服务。而不需要对于不同平台弄不同的解决方案。</p>
+</li>
+</ol>
+<p>综合上面两点主要的需求，我找了几个比较热门的解决方案.其中最多人在用的应该是<a href="https://abbypan.github.io/2017/10/11/dnsmasq-dnscrypt-dnswrapper" target="_blank" rel="noopener">dnsmasq+dnscrypt</a>。这种方案的好处显而易见，就是用户群体大，维护方便，相对来说不需要自己太多折腾。但是缺点是dnscrypt不支持指定ISPDNS，这样会使得CDN失效。这样对于访问速度而言伤害比较大。对此，幸运的找到了<a href="https://github.com/pymumu/smartdns" target="_blank" rel="noopener">smartdns</a>项目。它最符合我需求的一点就是</p>
+<blockquote>
+<ol>
+<li><strong>多DNS上游服务器</strong><br>支持配置多个上游DNS服务器，并同时进行查询，即使其中有DNS服务器异常，也不会影响查询。  </li>
+<li><strong>返回最快IP地址</strong><br>支持从域名所属IP地址列表中查找到访问速度最快的IP地址，并返回给客户端，提高网络访问速度。</li>
+<li><strong>支持多种查询协议</strong><br>支持UDP，TCP，TLS, HTTPS查询，以及非53端口查询。</li>
+</ol>
+</blockquote>
+<p>其他特性参见<a href="https://github.com/pymumu/smartdns" target="_blank" rel="noopener">https://github.com/pymumu/smartdns</a></p>
+<h2 id="搭建过程"><a href="#搭建过程" class="headerlink" title="搭建过程"></a>搭建过程</h2><p>smartdns本身支持了很多部署方式例如deb包、ipk包路由器固件等等。在官方的部署方式中亦给出了WSL子系统的部署方式。并且给出了脚本来进行部署。但是我在尝试了WSL的子系统方式部署后，发现一个问题是，WSL由于隐藏了比较多的细节，或者说实现的比较复杂，出现问题之后比较难debug。因为之前本机部署redis服务的时候，在Windows下搭建了一个docker。因此就试着</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker search smartdns</span><br></pre></td></tr></table></figure>
+<p>然后就发现了<a href="https://blog.ghostry.cn/server/894.html" target="_blank" rel="noopener">ghostry/smartdns</a>这个镜像。因为这个作者本身也是smartdns的使用者，于是将其打包成了镜像，并且上传到docker hub。</p>
+<p>对于smartdns的docker搭建，因为有了这个镜像简单了很多，只需要：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">//拉取镜像</span><br><span class="line">docker pull ghostry/smartdns</span><br><span class="line">//这两条命令是为了清除掉容器中已经有的同名镜像，防止出错。</span><br><span class="line">docker container stop gsmartdns</span><br><span class="line">docker container rm gsmartdns </span><br><span class="line">//以后台模式运行在53端口，并且设置自动启动，这里也可以监听853或者5353实现自建DNS over TLS或者DNS over TCP等等。</span><br><span class="line">docker run -d -p 53:53/udp --restart=always --name gsmartdns ghostry/smartdns</span><br></pre></td></tr></table></figure>
+
+<p>在上述命令运行成功之后，<a href="https://blog.ghostry.cn/" target="_blank" rel="noopener">ghostry</a>的docker镜像中原来就已经配置好了一份，但是没有包含被污染的ip列表，以及使用的上游DNS等等。这里上一份我自行修改之后的配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">conf-file blacklist-ip.conf</span><br><span class="line">conf-file gfw.conf</span><br><span class="line"></span><br><span class="line">bind [::]:53</span><br><span class="line">bind :53</span><br><span class="line">cache-size 4096                       </span><br><span class="line">prefetch-domain yes                   </span><br><span class="line">speed-check-mode tcp:80,tcp:443,ping  </span><br><span class="line">rr-ttl-min 60                         </span><br><span class="line">rr-ttl-max 86400</span><br><span class="line">log-level warn</span><br><span class="line"></span><br><span class="line">#这两个是我的ISP提供的DNS 用于获取国内的CDN地址 可以换成自己的ISPDNS或者删除</span><br><span class="line">server 211.141.90.68:53  -blacklist-ip -check-edns -group isp</span><br><span class="line">server 211.141.85.68:53  -blacklist-ip -check-edns -group isp</span><br><span class="line">#国内public dns 114 dnspod</span><br><span class="line">server 114.114.114.114:53 -group chinapub</span><br><span class="line">server 119.29.29.29:53 -group chinapub</span><br><span class="line">#google</span><br><span class="line">server 8.8.8.8 -blacklist-ip -group foreign</span><br><span class="line">#cloudflare</span><br><span class="line">server 1.0.0.1 -blacklist-ip -group foreign</span><br><span class="line">#dot doh方式查询</span><br><span class="line">server-tls 1.0.0.1 -group gfw</span><br><span class="line">server-tls 8.8.4.4 -group gfw</span><br><span class="line">server-https https:&#x2F;&#x2F;cloudflare-dns.com&#x2F;dns-query -group gfw</span><br></pre></td></tr></table></figure>
+<p>其中blacklist-ip.conf文件我使用的是这一份<a href="https://gist.github.com/simonsmh/2a609e0c801acabc2e1d7733432bce4c" target="_blank" rel="noopener">blacklist-ip.conf</a>，配置的参数含义参见<a href="https://github.com/pymumu/smartdns" target="_blank" rel="noopener">https://github.com/pymumu/smartdns</a></p>
+<p>在完成以上的配置步骤之后，就可以尝试将DNS改为127.0.0.1进行测试啦。</p>
+<p>关于ISPDNS，记得对nameserver进行配置</p>
+<h2 id="参照"><a href="#参照" class="headerlink" title="参照"></a>参照</h2><ul>
+<li><a href="https://github.com/pymumu/smartdns" target="_blank" rel="noopener">https://github.com/pymumu/smartdns</a></li>
+<li><a href="https://blog.ghostry.cn/server/894.html" target="_blank" rel="noopener">https://blog.ghostry.cn/server/894.html</a></li>
+<li><a href="https://abbypan.github.io/2017/10/11/dnsmasq-dnscrypt-dnswrapper" target="_blank" rel="noopener">https://abbypan.github.io/2017/10/11/dnsmasq-dnscrypt-dnswrapper</a></li>
+</ul>
+<p>我的使用配置文件在 &lt;../assets/blacklist-ip.conf&gt; &lt;../assets/gfw.conf&gt; &lt;../assets/config.conf&gt; 需要的话可以自取</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="../../index.html">首页</a></li>
+         
+          <li><a href="../../archives/">归档</a></li>
+         
+          <li><a href="../../search/">搜索</a></li>
+         
+          <li><a href="../../about/">关于</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#引言"><span class="toc-number">1.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#搭建过程"><span class="toc-number">2.</span> <span class="toc-text">搭建过程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参照"><span class="toc-number">3.</span> <span class="toc-text">参照</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <!-- qq空间分享 暂时没有找到icon 先不加入 -->
+  <!-- <li><a class="icon" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.yrx.me/post/a62e21c9/&sharesource=qzone&title=使用smartdns和docker搭建私有防劫持dns服务&summary=windows使用smartdns和docker下搭建一个私有DNS&pics=//blog.rx-0.top/assets/120.png" target="_blank" rel="noopener"><i 
+    class="fab fa-star fa-lg" aria-hidden="true"></i></a></li> -->
+  <li><a class="icon"
+      href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.yrx.me/post/a62e21c9/&sharesource=qzone&title=使用smartdns和docker搭建私有防劫持dns服务&summary=windows使用smartdns和docker下搭建一个私有DNS"><i 
+        class="fab fa-qq fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://service.weibo.com/share/share.php?url=https://blog.yrx.me/post/a62e21c9/&sharesource=weibo&title=使用smartdns和docker搭建私有防劫持dns服务&appkey=2309657449" target="_blank" rel="noopener"><i 
+        class="fas fa-weibo fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://blog.yrx.me/post/a62e21c9/" target="_blank" rel="noopener"><i
+        class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://blog.yrx.me/post/a62e21c9/&text=使用smartdns和docker搭建私有防劫持dns服务" target="_blank" rel="noopener"><i
+        class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=使用smartdns和docker搭建私有防劫持dns服务&body=windows使用smartdns和docker下搭建一个私有DNS:https://blog.yrx.me/post/a62e21c9/"><i
+        class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2021 mingmeng <a href="http://www.beian.miit.gov.cn" target="_blank" rel="noopener">赣ICP备17002327号</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="../../index.html">首页</a></li>
+         
+          <li><a href="../../archives/">归档</a></li>
+         
+          <li><a href="../../search/">搜索</a></li>
+         
+          <li><a href="../../about/">关于</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+  <!-- <div class="footer-left"> Thanks for <a href="https://github.com/probberechts/hexo-theme-cactus" target="_blank" rel="noopener">cactus</a>, <a href="https://hexo.io/" target="_blank" rel="noopener">hexo</a>, <a href="https://github.com/GetToSet" target="_blank" rel="noopener">GetToSet</a></div> -->
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="../../lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="../../lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="../../lib/jquery/jquery.min.js"></script>
+
+
+<script src="../../lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="../../lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="../../js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-150933648-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+<!-- Baidu Analytics -->
+
+    <script type="text/javascript">
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dd6e58987f7993d7d192dfd3401320a6";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

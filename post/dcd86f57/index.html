@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="关于一次部署短网址服务的一些心路历程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="短网址服务YOURLS的一些踩坑">
+<meta property="og:url" content="https://blog.yrx.me/post/dcd86f57/">
+<meta property="og:site_name" content="Run away with me">
+<meta property="og:description" content="关于一次部署短网址服务的一些心路历程">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-02-02T11:30:24.000Z">
+<meta property="article:modified_time" content="2021-12-01T16:18:41.851Z">
+<meta property="article:author" content="mingmeng">
+<meta property="article:tag" content="配置">
+<meta property="article:tag" content="摸爬滚打">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="../../assets/32.png">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="../../assets/120.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="../../assets/120.png">
+          
+        
+    
+    <!-- title -->
+    <title>短网址服务YOURLS的一些踩坑</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="../../css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="../../css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="../../index.html">首页</a></li>
+         
+          <li><a href="../../archives/">归档</a></li>
+         
+          <li><a href="../../search/">搜索</a></li>
+         
+          <li><a href="../../about/">关于</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="../a62e21c9/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="../c81d9ccd/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <!-- qq空间分享 暂时没有找到icon 先不加入 -->
+  <!-- <li><a class="icon" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.yrx.me/post/dcd86f57/&sharesource=qzone&title=短网址服务YOURLS的一些踩坑&summary=关于一次部署短网址服务的一些心路历程&pics=//blog.rx-0.top/assets/120.png" target="_blank" rel="noopener"><i 
+    class="fab fa-star " aria-hidden="true"></i></a></li> -->
+  <li><a class="icon"
+      href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.yrx.me/post/dcd86f57/&sharesource=qzone&title=短网址服务YOURLS的一些踩坑&summary=关于一次部署短网址服务的一些心路历程"><i 
+        class="fab fa-qq " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://service.weibo.com/share/share.php?url=https://blog.yrx.me/post/dcd86f57/&sharesource=weibo&title=短网址服务YOURLS的一些踩坑&appkey=2309657449" target="_blank" rel="noopener"><i 
+        class="fas fa-weibo " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://blog.yrx.me/post/dcd86f57/" target="_blank" rel="noopener"><i
+        class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://blog.yrx.me/post/dcd86f57/&text=短网址服务YOURLS的一些踩坑" target="_blank" rel="noopener"><i
+        class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=短网址服务YOURLS的一些踩坑&body=关于一次部署短网址服务的一些心路历程:https://blog.yrx.me/post/dcd86f57/"><i
+        class="fas fa-envelope " aria-hidden="true"></i></a></li>
+</ul>
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-number">1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#深坑"><span class="toc-number">2.</span> <span class="toc-text">深坑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#丰富的功能"><span class="toc-number">3.</span> <span class="toc-text">丰富的功能</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        短网址服务YOURLS的一些踩坑
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">mingmeng</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-02-02T11:30:24.000Z" itemprop="datePublished">2020-02-02</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="../../tags/%E6%91%B8%E7%88%AC%E6%BB%9A%E6%89%93/" rel="tag">摸爬滚打</a>, <a class="tag-link" href="../../tags/%E9%85%8D%E7%BD%AE/" rel="tag">配置</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>手上有个yrx.me的域名是之前在<a href="https://yrx.me/s/amh5i3" target="_blank" rel="noopener">https://hover.com</a>一刀注册来的，注册之后才发现.me域名压根不能备案，只好用回了.com的域名。但是这个.me域名一年续费有点小贵（<a href="https://yrx.me/s/w2x4b6" target="_blank" rel="noopener">https://tld-list.com</a>里面ICANN的一级服务商最低的都已经是porkbun的12.99刀了，也有可能是我时间没挑对。。。总而言之选了porkbun作为下一年的接盘侠），于是准备将这个域名用起来。因为不能备案，也就不能解析到国内机器，不然就是一波service hold。正好这边Google cloud的300刀赠金还在，于是准备在GCP-HK放个自己的短链接服务，以防各类短网址服务商的服务不稳定（感叹一下果然还是自己动手丰衣足食）。</p>
+<p>因为这次需要部署一个有GUI的成熟服务，所以没想自己写了，网上找了一圈，看到一个比较靠谱的<a href="https://yrx.me/s/xa6mne" target="_blank" rel="noopener">YOURLS</a>项目。这是一个基于PHP的项目，是一个比较成熟的短网址部署，我的几个需求：1. GUI 2.自定义网址 3.我熟悉的语言（方便debug和后面自己做私有化开发）都有满足。所以选择了这个项目进行部署。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>安装前置要求是需要NMP/AMP环境，官方使用的是Apache。</p>
+<p>部署过程这里是参考<a href="https://yrx.me/s/z1wu6g" target="_blank" rel="noopener">短网址程序YOURLS安装配置与设置中文</a>的教程。写的比较详细。</p>
+<h2 id="深坑"><a href="#深坑" class="headerlink" title="深坑"></a>深坑</h2><p>如果你和我用的一样是nginx，并且上面这篇文章处理.htacess的方法对你没有用的话，你可以试试将下面这段写入nginx站点server里面，注意，如果是部署在子目录，location /记得换成location /子目录名。</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">location</span> /  </span><br><span class="line">&#123;  </span><br><span class="line">    <span class="attribute">if</span> (!-f <span class="variable">$request_filename</span>)&#123;  </span><br><span class="line">        <span class="attribute">set</span> <span class="variable">$rule_0</span> <span class="number">1</span><span class="variable">$rule_0</span>;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="attribute">if</span> (!-d <span class="variable">$request_filename</span>)&#123;  </span><br><span class="line">        <span class="attribute">set</span> <span class="variable">$rule_0</span> <span class="number">2</span><span class="variable">$rule_0</span>;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="attribute">if</span> (<span class="variable">$rule_0</span> = <span class="string">"21"</span>)&#123;  </span><br><span class="line">        <span class="attribute">rewrite</span><span class="regexp"> ^/([0-9A-Za-z]+)/?$</span> /yourls-go.php?id=<span class="variable">$1</span> <span class="literal">last</span>;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="attribute">rewrite</span><span class="regexp"> ^/([0-9A-Za-z]+)\+/?$</span> /yourls-infos.php?id=<span class="variable">$1</span> <span class="literal">last</span>;  </span><br><span class="line">    <span class="attribute">rewrite</span><span class="regexp"> ^/([0-9A-Za-z]+)\+all/?$</span> /yourls-infos.php?id=<span class="variable">$1</span>&amp;all=<span class="number">1</span> <span class="literal">last</span>;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这么做的原因是，由于官方使用的.htacess是基于apache的modrewrite模块，nginx并不使用，因此将官方给的转为nginx的规则，并加入conf文件。官方使用的.htacess来控制短链接缩短，所以需要这样一个配置，来确保服务生效。</p>
+<h2 id="丰富的功能"><a href="#丰富的功能" class="headerlink" title="丰富的功能"></a>丰富的功能</h2><p>这个项目很有意思的一个地方是，它支持插件来扩展。并且也支持个人开发者写出更多插件，来丰富服务。例如官方自带的插件Random ShortURLs就是用于将链接转为随机链接使用的一款挺好用的插件。此外，也有很多很丰富的站点功能比如RSS支持、多域名支持、API支持以及spam功能。</p>
+<blockquote>
+<p>参考：</p>
+<ul>
+<li><a href="https://yrx.me/s/dsk74v" target="_blank" rel="noopener">http://o.xker.com/page/e2012/1114/121885.html</a></li>
+<li><a href="https://yrx.me/s/z1wu6g" target="_blank" rel="noopener">https://www.xiaoz.me/archives/9887</a></li>
+</ul>
+</blockquote>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="../../index.html">首页</a></li>
+         
+          <li><a href="../../archives/">归档</a></li>
+         
+          <li><a href="../../search/">搜索</a></li>
+         
+          <li><a href="../../about/">关于</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-number">1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#深坑"><span class="toc-number">2.</span> <span class="toc-text">深坑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#丰富的功能"><span class="toc-number">3.</span> <span class="toc-text">丰富的功能</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <!-- qq空间分享 暂时没有找到icon 先不加入 -->
+  <!-- <li><a class="icon" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.yrx.me/post/dcd86f57/&sharesource=qzone&title=短网址服务YOURLS的一些踩坑&summary=关于一次部署短网址服务的一些心路历程&pics=//blog.rx-0.top/assets/120.png" target="_blank" rel="noopener"><i 
+    class="fab fa-star fa-lg" aria-hidden="true"></i></a></li> -->
+  <li><a class="icon"
+      href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.yrx.me/post/dcd86f57/&sharesource=qzone&title=短网址服务YOURLS的一些踩坑&summary=关于一次部署短网址服务的一些心路历程"><i 
+        class="fab fa-qq fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://service.weibo.com/share/share.php?url=https://blog.yrx.me/post/dcd86f57/&sharesource=weibo&title=短网址服务YOURLS的一些踩坑&appkey=2309657449" target="_blank" rel="noopener"><i 
+        class="fas fa-weibo fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://blog.yrx.me/post/dcd86f57/" target="_blank" rel="noopener"><i
+        class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://blog.yrx.me/post/dcd86f57/&text=短网址服务YOURLS的一些踩坑" target="_blank" rel="noopener"><i
+        class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=短网址服务YOURLS的一些踩坑&body=关于一次部署短网址服务的一些心路历程:https://blog.yrx.me/post/dcd86f57/"><i
+        class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2021 mingmeng <a href="http://www.beian.miit.gov.cn" target="_blank" rel="noopener">赣ICP备17002327号</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="../../index.html">首页</a></li>
+         
+          <li><a href="../../archives/">归档</a></li>
+         
+          <li><a href="../../search/">搜索</a></li>
+         
+          <li><a href="../../about/">关于</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+  <!-- <div class="footer-left"> Thanks for <a href="https://github.com/probberechts/hexo-theme-cactus" target="_blank" rel="noopener">cactus</a>, <a href="https://hexo.io/" target="_blank" rel="noopener">hexo</a>, <a href="https://github.com/GetToSet" target="_blank" rel="noopener">GetToSet</a></div> -->
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="../../lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="../../lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="../../lib/jquery/jquery.min.js"></script>
+
+
+<script src="../../lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="../../lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="../../js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-150933648-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+<!-- Baidu Analytics -->
+
+    <script type="text/javascript">
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dd6e58987f7993d7d192dfd3401320a6";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

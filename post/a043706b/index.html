@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Java多线程和线程安全处理的一些东西">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅谈线程安全与否之重要性">
+<meta property="og:url" content="https://blog.yrx.me/post/a043706b/">
+<meta property="og:site_name" content="Run away with me">
+<meta property="og:description" content="Java多线程和线程安全处理的一些东西">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-08-17T06:51:21.000Z">
+<meta property="article:modified_time" content="2021-12-01T16:18:41.851Z">
+<meta property="article:author" content="mingmeng">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="多线程">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="../../assets/32.png">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="../../assets/120.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="../../assets/120.png">
+          
+        
+    
+    <!-- title -->
+    <title>浅谈线程安全与否之重要性</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="../../css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="../../css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="../../index.html">首页</a></li>
+         
+          <li><a href="../../archives/">归档</a></li>
+         
+          <li><a href="../../search/">搜索</a></li>
+         
+          <li><a href="../../about/">关于</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="../85b2a04/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="../82ee9938/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <!-- qq空间分享 暂时没有找到icon 先不加入 -->
+  <!-- <li><a class="icon" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.yrx.me/post/a043706b/&sharesource=qzone&title=浅谈线程安全与否之重要性&summary=Java多线程和线程安全处理的一些东西&pics=//blog.rx-0.top/assets/120.png" target="_blank" rel="noopener"><i 
+    class="fab fa-star " aria-hidden="true"></i></a></li> -->
+  <li><a class="icon"
+      href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.yrx.me/post/a043706b/&sharesource=qzone&title=浅谈线程安全与否之重要性&summary=Java多线程和线程安全处理的一些东西"><i 
+        class="fab fa-qq " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://service.weibo.com/share/share.php?url=https://blog.yrx.me/post/a043706b/&sharesource=weibo&title=浅谈线程安全与否之重要性&appkey=2309657449" target="_blank" rel="noopener"><i 
+        class="fas fa-weibo " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://blog.yrx.me/post/a043706b/" target="_blank" rel="noopener"><i
+        class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://blog.yrx.me/post/a043706b/&text=浅谈线程安全与否之重要性" target="_blank" rel="noopener"><i
+        class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=浅谈线程安全与否之重要性&body=Java多线程和线程安全处理的一些东西:https://blog.yrx.me/post/a043706b/"><i
+        class="fas fa-envelope " aria-hidden="true"></i></a></li>
+</ul>
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#对于Servlet中的线程安全问题"><span class="toc-number">1.</span> <span class="toc-text">对于Servlet中的线程安全问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Spring中的线程安全问题"><span class="toc-number">2.</span> <span class="toc-text">Spring中的线程安全问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#内存泄露"><span class="toc-number">3.</span> <span class="toc-text">内存泄露</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        浅谈线程安全与否之重要性
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">mingmeng</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2018-08-17T06:51:21.000Z" itemprop="datePublished">2018-08-17</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="../../tags/Java/" rel="tag">Java</a>, <a class="tag-link" href="../../tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag">多线程</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p><del>很久没有写过博客了，这算是一年来第一篇公开的博客来着</del><br><strong>开宗明义，先上一篇我觉得很棒的博客</strong><br><a href="https://www.cnblogs.com/wxd0108/p/5479442.html" target="_blank" rel="noopener" title="Java中的多线程你只要看这一篇就够了">Java中的多线程你只要看这一篇就够了</a><br>先介绍为什么会出现线程不安全的情况：计算机在执行多线程任务的时候，如果所能调度的只有单核，那么实际上的物理执行为：线程A执行部分过后暂停，然后线程B继续执行。这时，如果程序有全局变量或者静态变量的存在，同时两个线程内有对于全局或者静态变量的操作，那么很有可能导致的情况就就是两个线程在执行的时候，发生在对于同一个全局变量进行操作之后，主线程的内存被更新，而同时，子线程内存未更新而就开始进行操作操作以至于拿到不同的结果。例如如下代码：<br>count.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Count</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> num;  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">count</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= <span class="number">10</span>; i++) &#123;  </span><br><span class="line">            num += i;  </span><br><span class="line">        &#125;  </span><br><span class="line">        System.out.println(Thread.currentThread().getName() + <span class="string">"-"</span> + num);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>ThreadTest.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThreadTest</span> </span>&#123;  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;  </span><br><span class="line">        Runnable runnable = <span class="keyword">new</span> Runnable() &#123;  </span><br><span class="line">            Count count = <span class="keyword">new</span> Count();  </span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">                count.count();  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;;  </span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;  </span><br><span class="line">            <span class="keyword">new</span> Thread(runnable).start();  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行之后，可以发现，结果是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Thread-0-165</span><br><span class="line">Thread-1-275</span><br><span class="line">Thread-6-220</span><br><span class="line">Thread-3-165</span><br><span class="line">Thread-2-165</span><br><span class="line">Thread-5-385</span><br><span class="line">Thread-8-495</span><br><span class="line">Thread-4-330</span><br><span class="line">Thread-7-440</span><br><span class="line">Thread-9-550</span><br></pre></td></tr></table></figure>
+<p>可以看到，每个线程输出的数字都不太一样，在最后输出了550，也就是十个线程递增的结果。<br>而不是我们所期望的每个线程都输出55<br>那么为什么会造成这种情况呢？<br>答案是因为，CPU在执行多线程任务的时候，每个线程并非可以独立占用一个CPU，而是将一段代码分成几部分，然后各个线程的部分代码交替执行。<br>例如这里的子线程操作，一共如下几个步骤：</p>
+<ol>
+<li>读取主线程中count对象到子线程内存中。</li>
+<li>子线程操作引擎执行操作代码</li>
+<li>将计算结果从子线程内存中刷新到主线程</li>
+</ol>
+<p>但是在多线程的情况下，可能出现的情况为<br>线程1-1，线程2-1，线程1-2，线程1-3，线程2-3 或者其他的排序，因为CPU具体在执行代码的时候，会对于操作进行重排序，而排序情况是不确定的。<br>对此就引申出多线程几个重要的概念：</p>
+<ul>
+<li><p>原子性：是指一个操作是不可中断的。即使是多个线程一起执行的时候，一个操作一旦开始，就不会被其他线程干扰。比如，对于一个静态全局变量int i，两个线程同时对它赋值，线程A给他赋值为1，线程B给他赋值为-1。那么不管这两个线程以何种方式。何种步调工作，i的值要么是1，要么是-1.线程A和线程B之间是没有干扰的。这就是原子性的一个特点，不可被中断。</p>
+</li>
+<li><p>可见性：是指当一个线程修改了某一个共享变量的值，其他线程是否能够立即知道这个修改。显然，对于串行来说，可见性问题是不存在的。</p>
+</li>
+<li><p>有序性：在并发时，程序的执行可能会出现乱序。给人的直观感觉就是：写在前面的代码，会在后面执行。有序性问题的原因是因为程序在执行时，可能会进行指令重排，重排后的指令与原指令的顺序未必一致。</p>
+</li>
+</ul>
+<p>而线程不安全，就是违背了三个特性中的某一个特性而导致的输出非预期输出或其他问题。同时，解决线程的安全性与否，亦是从上面三个性质入手开始解决。例如之前的例子，便是由于count对象的num变量是成员变量，同时count对象是主线程内共享的，因此导致的问题就是上一个线程执行完以后，下一个线程拿到了count对象，并且读到了其成员变量num被修改过的值，所以导致了数字是累加而不是每个线程独立运算结果。<br>解决的方法有两种，第一个是将Count类里面的num作为局部变量使用，第二个是将count对象放在run方法里面，也就是将成员变量和共享的全局变量，改为局部变量。<br>我们将这个问题引申，当我们在写Java Web的代码时，由于Servlet接口是单实例，多线程的运行方式，也就是每个请求进来以后，单独开一个线程对于请求进行处理。但是由于上面所说，对于每个请求都是单实例但是多线程的方式，如果在Servlet中有了一个共享的成员变量或者全局变量，这样就会导致如果有线程在调用实例之后，对成员变量进行修改，那么另一个线程在调用实例时，并不知道成员变量被修改，而是遵循原来的逻辑直接输出，这样就会导致同样的输入可能得到不同的结果。<br>对此，我们有了第一种解决方法，因为被修改之后，下一个线程不一定能及时的拿到主线程内存的更新状态，因此我们需要做的便是，保持成员变量或全局变量的更新。这里引入<strong>volatile</strong>关键字。<br>定义:volatile的作用是作为指令关键字，确保本条指令不会因编译器的优化而省略，且要求每次直接读值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">volatile</span> <span class="keyword">int</span> i = <span class="number">0</span>, j = <span class="number">0</span>;  </span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">one</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">        i++;  </span><br><span class="line">        j++;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">two</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">        System.out.println(<span class="string">"i="</span> + i + <span class="string">" j="</span> + j);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>one方法和two方法还会并发的去执行，但是加上volatile可以将共享变量i和j的改变直接响应到主内存中，这样保证了主内存中i和j的值一致性，然而在执行two方法时，在two方法获取到i的值和获取到j的值中间的这段时间，one方法也许被执行了好多次，导致j的值会大于i的值。所以volatile可以保证内存可见性，不能保证并发有序性。<br>第二种解决方法便是synchronized关键字</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TraditionalThreadSynchronized</span> </span>&#123;  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;  </span><br><span class="line">        <span class="keyword">final</span> Outputter output = <span class="keyword">new</span> Outputter();  </span><br><span class="line">        <span class="keyword">new</span> Thread() &#123;  </span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">                output.output(<span class="string">"zhangsan"</span>);  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;.start();        </span><br><span class="line">        <span class="keyword">new</span> Thread() &#123;  </span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">                output.output(<span class="string">"lisi"</span>);  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;.start();  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Outputter</span> </span>&#123;  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">output</span><span class="params">(String name)</span> </span>&#123;  </span><br><span class="line">        <span class="comment">// TODO 为了保证对name的输出不是一个原子操作，这里逐个输出name的每个字符  </span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; name.length(); i++) &#123;  </span><br><span class="line">            System.out.print(name.charAt(i));  </span><br><span class="line">            <span class="comment">// Thread.sleep(10);  </span></span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>使用synchronized将需要互斥的代码包含起来，并上一把锁。</li>
+<li>将synchronized加在需要互斥的方法上。</li>
+</ol>
+<h3 id="对于Servlet中的线程安全问题"><a href="#对于Servlet中的线程安全问题" class="headerlink" title="对于Servlet中的线程安全问题"></a>对于Servlet中的线程安全问题</h3><p>1，变量的线程安全：这里的变量指字段和共享数据(如表单参数值)。</p>
+<p>  a，将 参数变量 本地化。多线程并不共享局部变量.所以我们要尽可能的在servlet中使用局部变量。<br>   例如：String user = “”;<br>         user = request.getParameter(“user”);</p>
+<p>  b，使用同步块Synchronized，防止可能异步调用的代码块。这意味着线程需要排队处理。<br>  在使用同板块的时候要尽可能的缩小同步代码的范围，不要直接在sevice方法和响应方法上使用同步，这样会严重影响性能。</p>
+<p> 2,属性的线程安全：ServletContext，HttpSession，ServletRequest对象中属性<br>  ServletContext：（线程是不安全的）<br>   ServletContext是可以多线程同时读/写属性的，线程是不安全的。要对属性的读写进行同步处理或者进行深度Clone()。<br>   所以在Servlet上下文中尽可能少量保存会被修改（写）的数据，可以采取其他方式在多个Servlet中共享，比方我们可以使用单例模式来处理共享数据。<br>  HttpSession：（线程是不安全的）<br>   HttpSession对象在用户会话期间存在，只能在处理属于同一个Session的请求的线程中被访问，因此Session对象的属性访问理论上是线程安全的。<br>   当用户打开多个同属于一个进程的浏览器窗口，在这些窗口的访问属于同一个Session，会出现多次请求，需要多个工作线程来处理请求，可能造成同时多线程读写属性。<br>   这时我们需要对属性的读写进行同步处理：使用同步块Synchronized和使用读/写器来解决。</p>
+<p>  ServletRequest：（线程是安全的）<br>   对于每一个请求，由一个工作线程来执行，都会创建有一个新的ServletRequest对象，所以ServletRequest对象只能在一个线程中被访问。ServletRequest是线程安全的。<br>   注意：ServletRequest对象在service方法的范围内是有效的，不要试图在service方法结束后仍然保存请求对象的引用。</p>
+<p> 3，使用同步的集合类：<br>  使用Vector代替ArrayList，使用Hashtable代替HashMap。</p>
+<p> 4，不要在Servlet中创建自己的线程来完成某个功能。<br>  Servlet本身就是多线程的，在Servlet中再创建线程，将导致执行情况复杂化，出现多线程安全问题。</p>
+<p> 5，在多个servlet中对外部对象(比方文件)进行修改操作一定要加锁，做到互斥的访问。<br> PS：SingleThreadModel接口亦可以 只不过已经被弃用</p>
+<h3 id="Spring中的线程安全问题"><a href="#Spring中的线程安全问题" class="headerlink" title="Spring中的线程安全问题"></a>Spring中的线程安全问题</h3><ol>
+<li>对操作共享变量的所用方法进行同步控制； </li>
+<li>同步共享变量，例如Collections.synchronizedMap()可以同步共享的Map。 </li>
+<li>使用同步对象，例如ConcurrentMap、AtomicInteger等对象都是线程安全的，使用AtomicInteger可以统计系统的并发量。</li>
+</ol>
+<h3 id="内存泄露"><a href="#内存泄露" class="headerlink" title="内存泄露"></a>内存泄露</h3><ol>
+<li>多关注集合类，比如HashMap，ArrayList等，这些对象经常会发生内存泄露。比如当它们被声明为静态对象时，它们的生命周期会跟应用程序的生命周期一样长，很容易造成内存不足。</li>
+<li>多关注事件监听（listeners）和回调（callbacks），比如注册了一个listener，当它不再被使用的时候，忘了注销该listener，可能就会产生内存泄露。</li>
+</ol>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="../../index.html">首页</a></li>
+         
+          <li><a href="../../archives/">归档</a></li>
+         
+          <li><a href="../../search/">搜索</a></li>
+         
+          <li><a href="../../about/">关于</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#对于Servlet中的线程安全问题"><span class="toc-number">1.</span> <span class="toc-text">对于Servlet中的线程安全问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Spring中的线程安全问题"><span class="toc-number">2.</span> <span class="toc-text">Spring中的线程安全问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#内存泄露"><span class="toc-number">3.</span> <span class="toc-text">内存泄露</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <!-- qq空间分享 暂时没有找到icon 先不加入 -->
+  <!-- <li><a class="icon" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.yrx.me/post/a043706b/&sharesource=qzone&title=浅谈线程安全与否之重要性&summary=Java多线程和线程安全处理的一些东西&pics=//blog.rx-0.top/assets/120.png" target="_blank" rel="noopener"><i 
+    class="fab fa-star fa-lg" aria-hidden="true"></i></a></li> -->
+  <li><a class="icon"
+      href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.yrx.me/post/a043706b/&sharesource=qzone&title=浅谈线程安全与否之重要性&summary=Java多线程和线程安全处理的一些东西"><i 
+        class="fab fa-qq fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://service.weibo.com/share/share.php?url=https://blog.yrx.me/post/a043706b/&sharesource=weibo&title=浅谈线程安全与否之重要性&appkey=2309657449" target="_blank" rel="noopener"><i 
+        class="fas fa-weibo fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://blog.yrx.me/post/a043706b/" target="_blank" rel="noopener"><i
+        class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://blog.yrx.me/post/a043706b/&text=浅谈线程安全与否之重要性" target="_blank" rel="noopener"><i
+        class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=浅谈线程安全与否之重要性&body=Java多线程和线程安全处理的一些东西:https://blog.yrx.me/post/a043706b/"><i
+        class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2021 mingmeng <a href="http://www.beian.miit.gov.cn" target="_blank" rel="noopener">赣ICP备17002327号</a>
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="../../index.html">首页</a></li>
+         
+          <li><a href="../../archives/">归档</a></li>
+         
+          <li><a href="../../search/">搜索</a></li>
+         
+          <li><a href="../../about/">关于</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+  <!-- <div class="footer-left"> Thanks for <a href="https://github.com/probberechts/hexo-theme-cactus" target="_blank" rel="noopener">cactus</a>, <a href="https://hexo.io/" target="_blank" rel="noopener">hexo</a>, <a href="https://github.com/GetToSet" target="_blank" rel="noopener">GetToSet</a></div> -->
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="../../lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="../../lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="../../lib/jquery/jquery.min.js"></script>
+
+
+<script src="../../lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="../../lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="../../js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-150933648-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+<!-- Baidu Analytics -->
+
+    <script type="text/javascript">
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dd6e58987f7993d7d192dfd3401320a6";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
